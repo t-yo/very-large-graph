@@ -1,0 +1,21 @@
+image: archlinux
+
+build:debug:gcc:
+  stage: build
+  before_script:
+    - pacman -Sy --noconfirm base-devel gcc clang cmake igraph
+  script:
+    - mkdir cmake-build-debug
+    - cd cmake-build-debug
+    - cmake .. -DCMAKE_BUILD_TYPE=Debug
+    - cmake --build .
+
+build:release:gcc:
+  stage: build
+  before_script:
+    - pacman -Sy --noconfirm base-devel gcc clang cmake igraph
+  script:
+    - mkdir cmake-build-debug
+    - cd cmake-build-debug
+    - cmake .. -DCMAKE_BUILD_TYPE=Release
+    - cmake --build .
