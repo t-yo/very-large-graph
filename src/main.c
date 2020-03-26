@@ -40,6 +40,49 @@ bool parse_options(options_t* options, int argc, char** argv)
     return true;
 }
 
+void compute_communities_leiden(igraph_t* graph)
+{
+    igraph_integer_t vcount = igraph_vcount(graph);
+    igraph_integer_t ecount = igraph_ecount(graph);
+
+    igraph_integer_t nb_clusters = vcount;
+    igraph_real_t quality = 0;
+
+    // Initialize communities
+    igraph_vector_t membership;
+    igraph_vector_init(&membership, vcount);
+
+    // Initialize the degrees
+    igraph_vector_t degrees;
+    igraph_vector_init(&degrees, vcount);
+    igraph_degree(graph, &degrees, igraph_vss_all(), IGRAPH_ALL, true);
+
+    // Compute the resolution
+    igraph_real_t resolution = 1.0 / (2.0 * ecount);
+    igraph_real_t beta = 0.01;
+    fprintf(stderr, "Resolution: %f\nBeta: %f\n", resolution, beta);
+
+    // Compute the communities
+    igraph_community_leiden(graph, NULL, &degrees, resolution, beta,
+        false, &membership, &nb_clusters, &quality);
+
+    fprintf(stderr, "Clusters: %d\n", nb_clusters);
+    if (isnan(quality))
+        fprintf(stderr, "Quality: nan\n");
+    else
+        fprintf(stderr, "Quality: %f\n", quality);
+
+    printf("Membership: ");
+    igraph_vector_print(&membership);
+    printf("\n");
+
+    // Destroy the degrees
+    igraph_vector_destroy(&degrees);
+
+    // Destroy the communities
+    igraph_vector_destroy(&membership);
+}
+
 int main(int argc, char** argv)
 {
     options_t options;
@@ -55,6 +98,9 @@ int main(int argc, char** argv)
 
     // Write it as dot format on stdout
     igraph_write_graph_dot(&graph, stdout);;
+
+    // Compute the communities
+    compute_communities_leiden(&graph);
 
     // Destroy the graph
     igraph_destroy(&graph);
