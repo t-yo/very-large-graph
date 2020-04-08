@@ -232,6 +232,23 @@ int main(int argc, char** argv)
         igraph_write_graph_dot(&quotient, stdout);
     }
 
+    // Get the diameter
+    igraph_integer_t diameter;
+    igraph_vector_t longest_path;
+    igraph_vector_init(&longest_path, 0);
+    igraph_diameter(&quotient, &diameter, NULL, NULL, &longest_path,
+        false, true);
+    fprintf(stderr, "Quotient diameter: %d\n", diameter);
+    fprintf(stderr, "Quotient longest path:");
+    for (igraph_integer_t i = 0; i < igraph_vector_size(&longest_path); ++i)
+    {
+        fprintf(stderr, " %d", (igraph_integer_t)VECTOR(longest_path)[i]);
+    }
+    fprintf(stderr, "\n");
+
+    // Destroy the longest path vector
+    igraph_vector_destroy(&longest_path);
+
     // Destroy the quotient graph
     igraph_destroy(&quotient);
 
