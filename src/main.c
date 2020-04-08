@@ -9,6 +9,9 @@ typedef struct options
 {
     FILE* input;
     char* input_name;
+
+    bool dot_original;
+    bool dot_quotient;
 } options_t;
 
 void graph_information(char* name, igraph_t* graph)
@@ -21,23 +24,46 @@ bool parse_options(options_t* options, int argc, char** argv)
 {
     options->input = stdin;
     options->input_name = "[stdin]";
+    options->dot_original = false;
+    options->dot_quotient = true;
 
-    if (argc == 2)
+    int current_arg = 1;
+    while (current_arg < argc)
     {
-        options->input_name = argv[1];
+        if (strcmp("--dot-original", argv[current_arg]) == 0)
+        {
+            options->dot_original = true;
+            options->dot_quotient = false;
+        } else
+        {
+            break;
+        }
+        current_arg += 1;
+    }
+
+    // If we don't have the filename at the end
+    if (current_arg == argc)
+    {
+        return true;
+    }
+
+    // If we have the filename at the end
+    if (current_arg + 1 == argc)
+    {
+        options->input_name = argv[current_arg];
 
         if (!(options->input = fopen(options->input_name, "r")))
         {
             fprintf(stderr, "%s\n", strerror(errno));
             return false;
         }
-    } else if (argc > 2)
-    {
-        fprintf(stderr, "Usage: %s [graph]\n", argv[0]);
-        return false;
+
+        return true;
     }
 
-    return true;
+    // If we have more arguments
+    fprintf(stderr, "Usage: %s [options] [graph]\n", argv[0]);
+    return false;
 }
 
 void compute_communities_louvain(igraph_t* graph)
@@ -131,7 +157,8 @@ void quotient_graph(igraph_t* result, igraph_t* graph,
     igraph_eit_t iterator;
     igraph_eit_create(graph, selector, &iterator);
 
-    while (!IGRAPH_EIT_END(iterator)) {
+    while (!IGRAPH_EIT_END(iterator))
+    {
         igraph_integer_t from, to;
         igraph_edge(graph, IGRAPH_EIT_GET(iterator), &from, &to);
 
@@ -171,8 +198,11 @@ int main(int argc, char** argv)
     // Display basic graph information
     graph_information(options.input_name, &graph);
 
-    // Write it as dot format on stdout
-    igraph_write_graph_dot(&graph, stdout);
+    if (options.dot_original)
+    {
+        // Write it as dot format on stdout
+        igraph_write_graph_dot(&graph, stdout);
+    }
 
     // Compute the communities using louvain
     // compute_communities_louvain(&graph);
@@ -188,8 +218,11 @@ int main(int argc, char** argv)
     // Display basic graph information
     graph_information("quotient", &quotient);
 
-    // Write it as dot format on stdout
-    igraph_write_graph_dot(&quotient, stdout);
+    if (options.dot_quotient)
+    {
+        // Write it as dot format on stdout
+        igraph_write_graph_dot(&quotient, stdout);
+    }
 
     // Destroy the quotient graph
     igraph_destroy(&quotient);
