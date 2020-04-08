@@ -87,9 +87,17 @@ void compute_communities_louvain(igraph_t* graph)
     igraph_modularity(graph, &membership, &modularity, NULL);
     fprintf(stderr, "Modularity: %f\n", modularity);
 
-    printf("Membership: ");
-    igraph_vector_print(&membership);
-    printf("\n");
+    // Print the communities
+    fprintf(stderr, "Membership: ");
+    if (vcount > 0)
+    {
+        fprintf(stderr, "%d", (igraph_integer_t)VECTOR(membership)[0]);
+        for (igraph_integer_t i = 1; i < vcount; ++i)
+        {
+            fprintf(stderr, " %d", (igraph_integer_t)VECTOR(membership)[i]);
+        }
+    }
+    fprintf(stderr, "\n");
 
     // Destroy the communities
     igraph_vector_destroy(&membership);
@@ -133,9 +141,17 @@ igraph_integer_t compute_communities_leiden(igraph_t* graph,
     igraph_modularity(graph, membership, &modularity, NULL);
     fprintf(stderr, "Modularity: %f\n", modularity);
 
-    printf("Membership: ");
-    igraph_vector_print(membership);
-    printf("\n");
+    // Print the communities
+    fprintf(stderr, "Membership: ");
+    if (vcount > 0)
+    {
+        fprintf(stderr, "%d", (igraph_integer_t)VECTOR(*membership)[0]);
+        for (igraph_integer_t i = 1; i < vcount; ++i)
+        {
+            fprintf(stderr, " %d", (igraph_integer_t)VECTOR(*membership)[i]);
+        }
+    }
+    fprintf(stderr, "\n");
 
     // Destroy the degrees
     igraph_vector_destroy(&degrees);
