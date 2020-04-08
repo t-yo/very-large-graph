@@ -69,7 +69,8 @@ void compute_communities_louvain(igraph_t* graph)
     igraph_vector_destroy(&membership);
 }
 
-void compute_communities_leiden(igraph_t* graph)
+igraph_integer_t compute_communities_leiden(igraph_t* graph,
+    igraph_vector_t* membership)
 {
     fprintf(stderr, "Running Leiden\n");
 
@@ -80,8 +81,7 @@ void compute_communities_leiden(igraph_t* graph)
     igraph_real_t quality = 0;
 
     // Initialize communities
-    igraph_vector_t membership;
-    igraph_vector_init(&membership, vcount);
+    igraph_vector_init(membership, vcount);
 
     // Initialize the degrees
     igraph_vector_t degrees;
@@ -95,7 +95,7 @@ void compute_communities_leiden(igraph_t* graph)
 
     // Compute the communities
     igraph_community_leiden(graph, NULL, &degrees, resolution, beta,
-        false, &membership, &nb_clusters, &quality);
+        false, membership, &nb_clusters, &quality);
 
     fprintf(stderr, "Clusters: %d\n", nb_clusters);
     if (isnan(quality))
@@ -104,18 +104,58 @@ void compute_communities_leiden(igraph_t* graph)
         fprintf(stderr, "Quality: %f\n", quality);
 
     igraph_real_t modularity;
-    igraph_modularity(graph, &membership, &modularity, NULL);
+    igraph_modularity(graph, membership, &modularity, NULL);
     fprintf(stderr, "Modularity: %f\n", modularity);
 
     printf("Membership: ");
-    igraph_vector_print(&membership);
+    igraph_vector_print(membership);
     printf("\n");
 
     // Destroy the degrees
     igraph_vector_destroy(&degrees);
 
-    // Destroy the communities
-    igraph_vector_destroy(&membership);
+    return nb_clusters;
+}
+
+void quotient_graph(igraph_t* result, igraph_t* graph,
+    igraph_integer_t nb_clusters, igraph_vector_t* membership)
+{
+    // Initialize the graph
+    igraph_small(result, nb_clusters, IGRAPH_UNDIRECTED, -1);
+
+    // Initialize the selector
+    igraph_es_t selector;
+    igraph_es_all(&selector, IGRAPH_EDGEORDER_ID);
+
+    // Initialize the iterator
+    igraph_eit_t iterator;
+    igraph_eit_create(graph, selector, &iterator);
+
+    while (!IGRAPH_EIT_END(iterator)) {
+        igraph_integer_t from, to;
+        igraph_edge(graph, IGRAPH_EIT_GET(iterator), &from, &to);
+
+        igraph_integer_t quotient_from = VECTOR(*membership)[from];
+        igraph_integer_t quotient_to = VECTOR(*membership)[to];
+
+        if (quotient_from != quotient_to)
+        {
+            igraph_bool_t connected;
+            igraph_are_connected(result, quotient_from, quotient_to, &connected);
+            if (!connected)
+            {
+                igraph_add_edge(result, quotient_from, quotient_to);
+            }
+        }
+
+        IGRAPH_EIT_NEXT(iterator);
+    }
+
+    // Destroy the iterator
+    igraph_eit_destroy(&iterator);
+
+    // Destroy the selector
+    igraph_es_destroy(&selector);
 }
 
 int main(int argc, char** argv)
@@ -135,10 +175,27 @@ int main(int argc, char** argv)
     igraph_write_graph_dot(&graph, stdout);
 
     // Compute the communities using louvain
-    compute_communities_louvain(&graph);
+    // compute_communities_louvain(&graph);
 
     // Compute the communities using leiden
-    compute_communities_leiden(&graph);
+    igraph_vector_t membership;
+    igraph_integer_t nb_clusters = compute_communities_leiden(&graph, &membership);
+
+    // Compute the quotient graph
+    igraph_t quotient;
+    quotient_graph(&quotient, &graph, nb_clusters, &membership);
+
+    // Display basic graph information
+    graph_information("quotient", &quotient);
+
+    // Write it as dot format on stdout
+    igraph_write_graph_dot(&quotient, stdout);
+
+    // Destroy the quotient graph
+    igraph_destroy(&quotient);
+
+    // Destroy the communities
+    igraph_vector_destroy(&membership);
 
     // Destroy the graph
     igraph_destroy(&graph);
