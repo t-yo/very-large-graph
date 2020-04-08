@@ -88,14 +88,10 @@ void compute_communities_louvain(igraph_t* graph)
     fprintf(stderr, "Modularity: %f\n", modularity);
 
     // Print the communities
-    fprintf(stderr, "Membership: ");
-    if (vcount > 0)
+    fprintf(stderr, "Membership:");
+    for (igraph_integer_t i = 0; i < vcount; ++i)
     {
-        fprintf(stderr, "%d", (igraph_integer_t)VECTOR(membership)[0]);
-        for (igraph_integer_t i = 1; i < vcount; ++i)
-        {
-            fprintf(stderr, " %d", (igraph_integer_t)VECTOR(membership)[i]);
-        }
+        fprintf(stderr, " %d", (igraph_integer_t)VECTOR(membership)[i]);
     }
     fprintf(stderr, "\n");
 
@@ -142,14 +138,10 @@ igraph_integer_t compute_communities_leiden(igraph_t* graph,
     fprintf(stderr, "Modularity: %f\n", modularity);
 
     // Print the communities
-    fprintf(stderr, "Membership: ");
-    if (vcount > 0)
+    fprintf(stderr, "Membership:");
+    for (igraph_integer_t i = 0; i < vcount; ++i)
     {
-        fprintf(stderr, "%d", (igraph_integer_t)VECTOR(*membership)[0]);
-        for (igraph_integer_t i = 1; i < vcount; ++i)
-        {
-            fprintf(stderr, " %d", (igraph_integer_t)VECTOR(*membership)[i]);
-        }
+        fprintf(stderr, " %d", (igraph_integer_t)VECTOR(*membership)[i]);
     }
     fprintf(stderr, "\n");
 
