@@ -5,6 +5,8 @@
 
 #include <igraph.h>
 
+#include "display.h"
+
 typedef struct options
 {
     FILE* input;
@@ -12,13 +14,9 @@ typedef struct options
 
     bool dot_original;
     bool dot_quotient;
+    bool dot_colored;
 } options_t;
 
-void graph_information(char* name, igraph_t* graph)
-{
-    fprintf(stderr, "Name: %s\nVertices: %d\nEdges: %d\n", name,
-        igraph_vcount(graph), igraph_ecount(graph));
-}
 
 bool parse_options(options_t* options, int argc, char** argv)
 {
@@ -26,6 +24,7 @@ bool parse_options(options_t* options, int argc, char** argv)
     options->input_name = "[stdin]";
     options->dot_original = false;
     options->dot_quotient = true;
+    options->dot_colored = false;
 
     int current_arg = 1;
     while (current_arg < argc)
@@ -34,6 +33,12 @@ bool parse_options(options_t* options, int argc, char** argv)
         {
             options->dot_original = true;
             options->dot_quotient = false;
+            options->dot_colored = false;
+        } else if (strcmp("--dot-colored", argv[current_arg]) == 0)
+        {
+            options->dot_original = false;
+            options->dot_quotient = false;
+            options->dot_colored = true;
         } else
         {
             break;
@@ -218,6 +223,14 @@ int main(int argc, char** argv)
     // Compute the communities using leiden
     igraph_vector_t membership;
     igraph_integer_t nb_clusters = compute_communities_leiden(&graph, &membership);
+
+    // Compute the cluster graph
+
+    if (options.dot_colored)
+    {
+        // Write it as dot format on stdout
+        write_graph_dot_clustered(&graph, stdout, nb_clusters, &membership);
+    }
 
     // Compute the quotient graph
     igraph_t quotient;

@@ -1,9 +1,9 @@
-add_executable(graph main.c)
+add_executable(graph main.c display.c display.h color.c color.h)
 
 find_package(IGRAPH REQUIRED)
 
 target_include_directories(graph PRIVATE ${IGRAPH_INCLUDES})
-target_link_libraries(graph PRIVATE ${IGRAPH_LIBRARIES})
+target_link_libraries(graph PRIVATE ${IGRAPH_LIBRARIES} m)
 target_compile_options(graph PRIVATE -Wall -Wextra -std=c11 -pedantic)
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
