@@ -36,10 +36,11 @@ igraph_integer_t compute_components(igraph_t* graph, igraph_vector_t* membership
     return nb_clusters;
 }
 
-void clean_graph(igraph_t* result, igraph_t* graph, igraph_vector_t* membership,
-    igraph_integer_t component, igraph_integer_t component_size)
+void write_clean_graph(igraph_t* graph, igraph_vector_t* membership,
+    igraph_integer_t component)
 {
     igraph_integer_t vcount = igraph_vcount(graph);
+    igraph_integer_t ecount = igraph_ecount(graph);
 
     // Compute the look-up table
     igraph_vector_t lut;
@@ -62,9 +63,6 @@ void clean_graph(igraph_t* result, igraph_t* graph, igraph_vector_t* membership,
     }
     fprintf(stderr, "\n");
 
-    // Initialize the graph
-    igraph_small(result, component_size, IGRAPH_UNDIRECTED, -1);
-
     // Initialize the selector
     igraph_es_t selector;
     igraph_es_all(&selector, IGRAPH_EDGEORDER_ID);
@@ -73,6 +71,9 @@ void clean_graph(igraph_t* result, igraph_t* graph, igraph_vector_t* membership,
     igraph_eit_t iterator;
     igraph_eit_create(graph, selector, &iterator);
 
+    igraph_integer_t percentage = 0;
+    fprintf(stderr,"Creating component graph: %d%%\n", percentage);
+    igraph_integer_t e = 0;
     while (!IGRAPH_EIT_END(iterator))
     {
         igraph_integer_t from, to;
@@ -83,7 +84,17 @@ void clean_graph(igraph_t* result, igraph_t* graph, igraph_vector_t* membership,
 
         if (component_from == component && component_to == component)
         {
-            igraph_add_edge(result, VECTOR(lut)[from], VECTOR(lut)[to]);
+            fprintf(stdout, "%d %d\n", (igraph_integer_t)VECTOR(lut)[from],
+                (igraph_integer_t)VECTOR(lut)[to]);
+        }
+
+        e++;
+        igraph_integer_t new_percentage = e * 100ll / ecount;
+        if (new_percentage > percentage)
+        {
+            percentage = new_percentage;
+            fprintf(stderr, "Creating component graph: %d%%\n",
+                percentage);
         }
 
         IGRAPH_EIT_NEXT(iterator);
@@ -120,6 +131,9 @@ int main(int argc, char** argv)
     // Display basic graph information
     graph_information(argv[1], &graph);
 
+    // Simplify the graph
+    igraph_simplify(&graph, true, true, NULL);
+
     // Compute the components
     igraph_vector_t membership;
     igraph_vector_t cluster_sizes;
@@ -128,21 +142,7 @@ int main(int argc, char** argv)
     igraph_integer_t largest = igraph_vector_which_max(&cluster_sizes);
 
     // Compute the cluster graph
-    igraph_t clean;
-    clean_graph(&clean, &graph, &membership, largest,
-        VECTOR(cluster_sizes)[largest]);
-
-    // Simplify the cluster graph
-    igraph_simplify(&clean, true, true, NULL);
-
-    // Display basic graph information
-    graph_information("clean", &clean);
-
-    // Write it as dot format on stdout
-    igraph_write_graph_edgelist(&clean, stdout);
-
-    // Destroy the quotient graph
-    igraph_destroy(&clean);
+    write_clean_graph(&graph, &membership, largest);
 
     // Destroy the components
     igraph_vector_destroy(&cluster_sizes);
