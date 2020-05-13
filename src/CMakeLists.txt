@@ -1,4 +1,4 @@
-add_library(lib display.c display.h color.c color.h quotient.c quotient.h)
+add_library(lib display.c display.h color.c color.h quotient.c quotient.h sweep.c sweep.h)
 
 add_executable(graph main.c)
 add_executable(extract extract.c)
