@@ -6,6 +6,7 @@
 #include <igraph.h>
 
 #include "display.h"
+#include "quotient.h"
 
 typedef struct options
 {
@@ -156,47 +157,7 @@ igraph_integer_t compute_communities_leiden(igraph_t* graph,
     return nb_clusters;
 }
 
-void quotient_graph(igraph_t* result, igraph_t* graph,
-    igraph_integer_t nb_clusters, igraph_vector_t* membership)
-{
-    // Initialize the graph
-    igraph_small(result, nb_clusters, IGRAPH_UNDIRECTED, -1);
 
-    // Initialize the selector
-    igraph_es_t selector;
-    igraph_es_all(&selector, IGRAPH_EDGEORDER_ID);
-
-    // Initialize the iterator
-    igraph_eit_t iterator;
-    igraph_eit_create(graph, selector, &iterator);
-
-    while (!IGRAPH_EIT_END(iterator))
-    {
-        igraph_integer_t from, to;
-        igraph_edge(graph, IGRAPH_EIT_GET(iterator), &from, &to);
-
-        igraph_integer_t quotient_from = VECTOR(*membership)[from];
-        igraph_integer_t quotient_to = VECTOR(*membership)[to];
-
-        if (quotient_from != quotient_to)
-        {
-            igraph_bool_t connected;
-            igraph_are_connected(result, quotient_from, quotient_to, &connected);
-            if (!connected)
-            {
-                igraph_add_edge(result, quotient_from, quotient_to);
-            }
-        }
-
-        IGRAPH_EIT_NEXT(iterator);
-    }
-
-    // Destroy the iterator
-    igraph_eit_destroy(&iterator);
-
-    // Destroy the selector
-    igraph_es_destroy(&selector);
-}
 
 typedef struct cluster_statistics_bfs_result_t
 {
@@ -330,7 +291,7 @@ int main(int argc, char** argv)
 
     // Compute the quotient graph
     igraph_t quotient;
-    quotient_graph(&quotient, &graph, nb_clusters, &membership);
+    quotient_graph(&graph, nb_clusters, &membership, &quotient);
 
     // Compute the cluster statistics
     igraph_vector_t counts;
