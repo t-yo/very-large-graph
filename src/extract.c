@@ -6,6 +6,7 @@
 #include <igraph.h>
 
 #include "display.h"
+#include "vector.h"
 
 igraph_integer_t compute_components(igraph_t* graph, igraph_vector_t* membership,
     igraph_vector_t* csize)
@@ -21,16 +22,10 @@ igraph_integer_t compute_components(igraph_t* graph, igraph_vector_t* membership
     igraph_clusters(graph, membership, csize, &nb_clusters, IGRAPH_WEAK);
 
     // Print the components
-    fprintf(stderr, "Components: %d:", nb_clusters);
-    for (igraph_integer_t i = 0; i < nb_clusters; ++i)
-    {
-        fprintf(stderr, " %d", (igraph_integer_t) VECTOR(*csize)[i]);
-    }
-    fprintf(stderr, "\nMembership:");
-    for (igraph_integer_t i = 0; i < vcount; ++i)
-    {
-        fprintf(stderr, " %d", (igraph_integer_t) VECTOR(*membership)[i]);
-    }
+    fprintf(stderr, "Components: %d: ", nb_clusters);
+    vector_int_fprint(stderr, csize);
+    fprintf(stderr, "\nMembership: ");
+    vector_int_fprint(stderr, membership);
     fprintf(stderr, "\n");
 
     return nb_clusters;
@@ -56,11 +51,8 @@ void write_clean_graph(igraph_t* graph, igraph_vector_t* membership,
             VECTOR(lut)[i] = -1;
         }
     }
-    fprintf(stderr, "LUT:");
-    for (igraph_integer_t i = 0; i < vcount; ++i)
-    {
-        fprintf(stderr, " %d", (igraph_integer_t) VECTOR(lut)[i]);
-    }
+    fprintf(stderr, "LUT: ");
+    vector_int_fprint(stderr, &lut);
     fprintf(stderr, "\n");
 
     // Initialize the selector

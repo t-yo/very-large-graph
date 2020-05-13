@@ -4,6 +4,8 @@
 
 #include <igraph.h>
 
+#include "vector.h"
+
 typedef struct sweep_result
 {
     igraph_integer_t max_distance;
@@ -87,16 +89,10 @@ void compute_clusters_statistics(igraph_t* graph, igraph_integer_t nb_clusters,
     }
 
     // Print the diameters
-    fprintf(stderr, "Counts:");
-    for (igraph_integer_t i = 0; i < nb_clusters; ++i)
-    {
-        fprintf(stderr, " %d", (igraph_integer_t) VECTOR(*counts)[i]);
-    }
-    fprintf(stderr, "\nDiameters:");
-    for (igraph_integer_t i = 0; i < nb_clusters; ++i)
-    {
-        fprintf(stderr, " %d", (igraph_integer_t) VECTOR(*diameters)[i]);
-    }
+    fprintf(stderr, "Counts: ");
+    vector_int_fprint(stderr, counts);
+    fprintf(stderr, "\nDiameters: ");
+    vector_int_fprint(stderr, diameters);
     fprintf(stderr, "\n");
 }
 

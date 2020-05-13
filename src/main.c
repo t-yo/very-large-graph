@@ -8,6 +8,7 @@
 #include "display.h"
 #include "quotient.h"
 #include "sweep.h"
+#include "vector.h"
 
 typedef struct options
 {
@@ -25,7 +26,7 @@ bool parse_options(options_t* options, int argc, char** argv)
     options->input = stdin;
     options->input_name = "[stdin]";
     options->dot_original = false;
-    options->dot_quotient = true;
+    options->dot_quotient = false;
     options->dot_colored = false;
 
     int current_arg = 1;
@@ -41,6 +42,11 @@ bool parse_options(options_t* options, int argc, char** argv)
             options->dot_original = false;
             options->dot_quotient = false;
             options->dot_colored = true;
+        } else if (strcmp("--dot-quotient", argv[current_arg]) == 0)
+        {
+            options->dot_original = false;
+            options->dot_quotient = true;
+            options->dot_colored = false;
         } else
         {
             break;
@@ -95,11 +101,8 @@ void compute_communities_louvain(igraph_t* graph)
     fprintf(stderr, "Modularity: %f\n", modularity);
 
     // Print the communities
-    fprintf(stderr, "Membership:");
-    for (igraph_integer_t i = 0; i < vcount; ++i)
-    {
-        fprintf(stderr, " %d", (igraph_integer_t)VECTOR(membership)[i]);
-    }
+    fprintf(stderr, "Membership: ");
+    vector_int_fprint(stderr, &membership);
     fprintf(stderr, "\n");
 
     // Destroy the communities
@@ -145,11 +148,8 @@ igraph_integer_t compute_communities_leiden(igraph_t* graph,
     fprintf(stderr, "Modularity: %f\n", modularity);
 
     // Print the communities
-    fprintf(stderr, "Membership:");
-    for (igraph_integer_t i = 0; i < vcount; ++i)
-    {
-        fprintf(stderr, " %d", (igraph_integer_t)VECTOR(*membership)[i]);
-    }
+    fprintf(stderr, "Membership: ");
+    vector_int_fprint(stderr, membership);
     fprintf(stderr, "\n");
 
     // Destroy the degrees
@@ -157,6 +157,8 @@ igraph_integer_t compute_communities_leiden(igraph_t* graph,
 
     return nb_clusters;
 }
+
+
 
 int main(int argc, char** argv)
 {
@@ -224,13 +226,8 @@ int main(int argc, char** argv)
     igraph_diameter(&quotient, &quotient_diameter, NULL, NULL,
         &quotient_longest_path, false, true);
     fprintf(stderr, "Quotient diameter: %d\n", quotient_diameter);
-    fprintf(stderr, "Quotient longest path:");
-    for (igraph_integer_t i = 0; i < igraph_vector_size(&quotient_longest_path);
-         ++i)
-    {
-        fprintf(stderr, " %d",
-            (igraph_integer_t) VECTOR(quotient_longest_path)[i]);
-    }
+    fprintf(stderr, "Quotient longest path: ");
+    vector_int_fprint(stderr, &quotient_longest_path);
     fprintf(stderr, "\n");
 
     // Destroy the longest path vector
