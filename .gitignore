@@ -130,3 +130,6 @@ tags
 .vim
 
 # End of https://www.gitignore.io/api/vim,cmake,clion+all
+
+build/
+build_/
