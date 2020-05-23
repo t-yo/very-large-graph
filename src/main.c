@@ -243,7 +243,7 @@ int main(int argc, char** argv)
     }
 
     // Print the overall diameter
-    igraph_integer_t diameter = igraph_matrix_max(&distances);
+    igraph_integer_t diameter = matrix_max_real(&distances);
     fprintf(stderr, "Diameter: %d\n", diameter);
 
     // destroy the distances

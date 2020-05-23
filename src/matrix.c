@@ -27,3 +27,22 @@
 MATRIX_FPRINT_IMPLEMENTATION(, "%f", igraph_real_t)
 
 MATRIX_FPRINT_IMPLEMENTATION(int_, "%d", igraph_integer_t)
+
+igraph_real_t matrix_max_real(igraph_matrix_t* matrix)
+{
+    igraph_real_t max = -IGRAPH_INFINITY;
+    igraph_integer_t rows = igraph_matrix_nrow(matrix);
+    igraph_integer_t cols = igraph_matrix_ncol(matrix);
+    for (igraph_integer_t i = 0; i < rows; ++i)
+    {
+        for (igraph_integer_t j = 0; j < cols; ++j)
+        {
+            igraph_real_t value = MATRIX(*matrix, i, j);
+            if ((max < value) && (value < INFINITY))
+            {
+                max = value;
+            }
+        }
+    }
+    return max;
+}
