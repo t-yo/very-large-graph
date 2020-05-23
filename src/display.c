@@ -176,8 +176,8 @@ static void write_graph_dot_node_colored_edges(igraph_t* graph, igraph_vector_t*
         igraph_edge(graph, edge, &from, &to);
         u_int32_t color = generate_color(from, vcount);
 
-        fprintf(output, "    %d -> %d [color=\"#%06x\", label=\"%d\"];\n",
-            from, to, color, (igraph_integer_t) VECTOR(*weights)[edge]);
+        fprintf(output, "    %d -> %d [color=\"#%06x\", fontcolor=\"#%06x\", label=\"%d\"];\n",
+            from, to, color,color, (igraph_integer_t) VECTOR(*weights)[edge]);
 
         IGRAPH_EIT_NEXT(iterator);
     }
