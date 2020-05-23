@@ -3,7 +3,8 @@ add_library(lib
     color.c color.h
     quotient.c quotient.h
     sweep.c sweep.h
-    vector.c vector.h)
+    vector.c vector.h
+    matrix.c matrix.h)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -std=c11")
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Ofast -march=native")

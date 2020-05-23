@@ -9,6 +9,7 @@
 #include "quotient.h"
 #include "sweep.h"
 #include "vector.h"
+#include "matrix.h"
 
 typedef struct options
 {
@@ -20,7 +21,6 @@ typedef struct options
     bool dot_colored;
     bool dot_weighted_quotient;
 } options_t;
-
 
 bool parse_options(options_t* options, int argc, char** argv)
 {
@@ -203,6 +203,26 @@ void weight_quotient_graph(igraph_t* quotient, igraph_vector_t* diameters,
     }
 }
 
+void graph_distances(igraph_t* graph, igraph_vector_t* weights,
+    igraph_matrix_t* results)
+{
+    igraph_integer_t vcount = igraph_vcount(graph);
+
+    // Initialize the matrix
+    igraph_matrix_init(results, vcount, vcount);
+
+    // Initialize the from selector
+    igraph_vs_t from_selector;
+    igraph_vs_all(&from_selector);
+
+    // Initialize the to selector
+    igraph_vs_t to_selector;
+    igraph_vs_all(&to_selector);
+
+    // Compute the paths
+    igraph_shortest_paths_dijkstra(graph, results, from_selector, to_selector,
+        weights, IGRAPH_OUT);
+}
 
 int main(int argc, char** argv)
 {
@@ -218,10 +238,9 @@ int main(int argc, char** argv)
     graph_information(options.input_name, &graph);
 
     igraph_integer_t count;
-    igraph_integer_t diameter;
-    compute_statistics(&graph, &count, &diameter);
-    fprintf(stderr, "Diameter (double sweep): %d\n", diameter);
-
+    igraph_integer_t diameter_sweep;
+    compute_statistics(&graph, &count, &diameter_sweep);
+    fprintf(stderr, "Diameter (double sweep): %d\n", diameter_sweep);
 
     if (options.dot_original)
     {
@@ -274,6 +293,7 @@ int main(int argc, char** argv)
     vector_int_fprint(stderr, &quotient_longest_path);
     fprintf(stderr, "\n");
 
+    // Create the weighted quotient graph
     igraph_t weighted_quotient;
     igraph_vector_t weighted_quotient_weights;
     weight_quotient_graph(&quotient, &diameters,
@@ -285,6 +305,21 @@ int main(int argc, char** argv)
         write_graph_dot_node_colored(&weighted_quotient,
             &weighted_quotient_weights, stdout);
     }
+
+    // Compute all the distances
+    igraph_matrix_t distances;
+    graph_distances(&weighted_quotient, &weighted_quotient_weights, &distances);
+
+    // Display the distances
+    fprintf(stderr, "Distances: \n");
+    matrix_int_fprint(stderr, &distances, 4);
+
+    // Print the overall diameter
+    igraph_integer_t diameter = igraph_matrix_max(&distances);
+    fprintf(stderr, "Diameter: %d\n", diameter);
+
+    // destroy the distances
+    igraph_matrix_destroy(&distances);
 
     // Destroy the weighted quotient graph
     igraph_vector_destroy(&weighted_quotient_weights);
