@@ -8,6 +8,7 @@ typedef int(* option_func_t)(int argc, char** argv, options_t* options);
 typedef struct option
 {
     char* option;
+    char* help;
     option_func_t callback;
 } option_t;
 
@@ -74,26 +75,32 @@ static int handle_print_distances(int argc, char** argv, options_t* options)
 static option_t all_options[] = {
     {
         .option = "--dot-original",
+        .help = "print the original graph in dot format",
         .callback = handle_dot_original,
     },
     {
         .option = "--dot-colored",
+        .help = "print the original graph in dot format, with the clusters grouped together and colored",
         .callback = handle_dot_colored,
     },
     {
         .option = "--dot-quotient",
+        .help = "print the quotient graph",
         .callback = handle_dot_quotient,
     },
     {
         .option = "--dot-weighted-quotient",
+        .help = "print the weighted quotient graph",
         .callback = handle_dot_weighted_quotient,
     },
     {
         .option = "--print-membership",
+        .help = "print the membership of each vertex from the original graph",
         .callback = handle_print_membership,
     },
     {
         .option = "--print-distances",
+        .help = "print the weighted distances between each two nodes in the weighted quotient graph",
         .callback = handle_print_distances,
     },
 };
@@ -152,5 +159,11 @@ bool parse_options(int argc, char** argv, options_t* options)
 
     // If we have more arguments
     fprintf(stderr, "Usage: %s [options] [graph]\n", argv[0]);
+    fprintf(stderr, "The information are printed on stderr, the graphs are printed on stdout.\n");
+    fprintf(stderr, "Options:\n");
+    for (int i = 0; i < options_count; ++i)
+    {
+        fprintf(stderr, "    %s: %s\n", all_options[i].option, all_options[i].help);
+    }
     return false;
 }
