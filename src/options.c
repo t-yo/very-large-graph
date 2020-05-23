@@ -12,6 +12,14 @@ typedef struct option
     option_func_t callback;
 } option_t;
 
+static int handle_help(int argc, char** argv, options_t* options)
+{
+    (void) argc;
+    (void) argv;
+    options->help = true;
+    return -1;
+}
+
 static int handle_dot_original(int argc, char** argv, options_t* options)
 {
     (void) argc;
@@ -74,6 +82,11 @@ static int handle_print_distances(int argc, char** argv, options_t* options)
 
 static option_t all_options[] = {
     {
+        .option = "--help",
+        .help = "show this help",
+        .callback = handle_help,
+    },
+    {
         .option = "--dot-original",
         .help = "print the original graph in dot format",
         .callback = handle_dot_original,
@@ -109,6 +122,7 @@ bool parse_options(int argc, char** argv, options_t* options)
 {
     options->input = stdin;
     options->input_name = "[stdin]";
+    options->help = false;
     options->dot_original = false;
     options->dot_quotient = false;
     options->dot_colored = false;
@@ -137,24 +151,27 @@ bool parse_options(int argc, char** argv, options_t* options)
         current_arg += found;
     }
 
-    // If we don't have the filename at the end
-    if (current_arg == argc)
+    if (!options->help)
     {
-        return true;
-    }
-
-    // If we have the filename at the end
-    if (current_arg + 1 == argc)
-    {
-        options->input_name = argv[current_arg];
-
-        if (!(options->input = fopen(options->input_name, "r")))
+        // If we don't have the filename at the end
+        if (current_arg == argc)
         {
-            fprintf(stderr, "%s\n", strerror(errno));
-            return false;
+            return true;
         }
 
-        return true;
+        // If we have the filename at the end
+        if (current_arg + 1 == argc)
+        {
+            options->input_name = argv[current_arg];
+
+            if (!(options->input = fopen(options->input_name, "r")))
+            {
+                fprintf(stderr, "%s\n", strerror(errno));
+                return false;
+            }
+
+            return true;
+        }
     }
 
     // If we have more arguments

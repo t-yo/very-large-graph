@@ -8,6 +8,8 @@ typedef struct options
     FILE* input;
     char* input_name;
 
+    bool help;
+
     bool dot_original;
     bool dot_colored;
     bool dot_quotient;
