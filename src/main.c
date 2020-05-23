@@ -10,85 +10,7 @@
 #include "sweep.h"
 #include "vector.h"
 #include "matrix.h"
-
-typedef struct options
-{
-    FILE* input;
-    char* input_name;
-
-    bool dot_original;
-    bool dot_quotient;
-    bool dot_colored;
-    bool dot_weighted_quotient;
-} options_t;
-
-bool parse_options(options_t* options, int argc, char** argv)
-{
-    options->input = stdin;
-    options->input_name = "[stdin]";
-    options->dot_original = false;
-    options->dot_quotient = false;
-    options->dot_colored = false;
-    options->dot_weighted_quotient = false;
-
-    int current_arg = 1;
-    while (current_arg < argc)
-    {
-        if (strcmp("--dot-original", argv[current_arg]) == 0)
-        {
-            options->dot_original = true;
-            options->dot_quotient = false;
-            options->dot_colored = false;
-            options->dot_weighted_quotient = false;
-        } else if (strcmp("--dot-colored", argv[current_arg]) == 0)
-        {
-            options->dot_original = false;
-            options->dot_quotient = false;
-            options->dot_colored = true;
-            options->dot_weighted_quotient = false;
-        } else if (strcmp("--dot-quotient", argv[current_arg]) == 0)
-        {
-            options->dot_original = false;
-            options->dot_quotient = true;
-            options->dot_colored = false;
-            options->dot_weighted_quotient = false;
-        } else if (strcmp("--dot-weighted-quotient", argv[current_arg]) == 0)
-        {
-            options->dot_original = false;
-            options->dot_quotient = false;
-            options->dot_colored = false;
-            options->dot_weighted_quotient = true;
-        } else
-        {
-            break;
-        }
-        current_arg += 1;
-    }
-
-    // If we don't have the filename at the end
-    if (current_arg == argc)
-    {
-        return true;
-    }
-
-    // If we have the filename at the end
-    if (current_arg + 1 == argc)
-    {
-        options->input_name = argv[current_arg];
-
-        if (!(options->input = fopen(options->input_name, "r")))
-        {
-            fprintf(stderr, "%s\n", strerror(errno));
-            return false;
-        }
-
-        return true;
-    }
-
-    // If we have more arguments
-    fprintf(stderr, "Usage: %s [options] [graph]\n", argv[0]);
-    return false;
-}
+#include "options.h"
 
 void compute_communities_louvain(igraph_t* graph)
 {
@@ -227,7 +149,7 @@ void graph_distances(igraph_t* graph, igraph_vector_t* weights,
 int main(int argc, char** argv)
 {
     options_t options;
-    if (!parse_options(&options, argc, argv))
+    if (!parse_options(argc, argv, &options))
         return 1;
 
     igraph_t graph;
