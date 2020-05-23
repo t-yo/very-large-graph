@@ -80,11 +80,6 @@ igraph_integer_t compute_communities_leiden(igraph_t* graph,
     igraph_modularity(graph, membership, &modularity, NULL);
     fprintf(stderr, "Modularity: %f\n", modularity);
 
-    // Print the communities
-    fprintf(stderr, "Membership: ");
-    vector_int_fprint(stderr, membership);
-    fprintf(stderr, "\n");
-
     // Destroy the degrees
     igraph_vector_destroy(&degrees);
 
@@ -177,6 +172,14 @@ int main(int argc, char** argv)
     igraph_vector_t membership;
     igraph_integer_t nb_clusters = compute_communities_leiden(&graph, &membership);
 
+    if (options.print_membership)
+    {
+        // Print the communities
+        fprintf(stderr, "Membership: ");
+        vector_int_fprint(stderr, &membership);
+        fprintf(stderr, "\n");
+    }
+
     // Compute the cluster graph
 
     if (options.dot_colored)
@@ -232,9 +235,12 @@ int main(int argc, char** argv)
     igraph_matrix_t distances;
     graph_distances(&weighted_quotient, &weighted_quotient_weights, &distances);
 
-    // Display the distances
-    fprintf(stderr, "Distances: \n");
-    matrix_int_fprint(stderr, &distances, 4);
+    if (options.print_distances)
+    {
+        // Display the distances
+        fprintf(stderr, "Distances: \n");
+        matrix_int_fprint(stderr, &distances, 4);
+    }
 
     // Print the overall diameter
     igraph_integer_t diameter = igraph_matrix_max(&distances);

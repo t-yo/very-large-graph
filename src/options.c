@@ -55,6 +55,22 @@ static int handle_dot_weighted_quotient(int argc, char** argv, options_t* option
     return 1;
 }
 
+static int handle_print_membership(int argc, char** argv, options_t* options)
+{
+    (void) argc;
+    (void) argv;
+    options->print_membership = true;
+    return 1;
+}
+
+static int handle_print_distances(int argc, char** argv, options_t* options)
+{
+    (void) argc;
+    (void) argv;
+    options->print_distances = true;
+    return 1;
+}
+
 static option_t all_options[] = {
     {
         .option = "--dot-original",
@@ -72,6 +88,14 @@ static option_t all_options[] = {
         .option = "--dot-weighted-quotient",
         .callback = handle_dot_weighted_quotient,
     },
+    {
+        .option = "--print-membership",
+        .callback = handle_print_membership,
+    },
+    {
+        .option = "--print-distances",
+        .callback = handle_print_distances,
+    },
 };
 
 bool parse_options(int argc, char** argv, options_t* options)
@@ -82,6 +106,8 @@ bool parse_options(int argc, char** argv, options_t* options)
     options->dot_quotient = false;
     options->dot_colored = false;
     options->dot_weighted_quotient = false;
+    options->print_membership = false;
+    options->print_distances = false;
 
     int options_count = sizeof(all_options) / sizeof(option_t);
     int current_arg = 1;
