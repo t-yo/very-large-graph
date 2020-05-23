@@ -18,6 +18,7 @@ typedef struct options
     bool dot_original;
     bool dot_quotient;
     bool dot_colored;
+    bool dot_weighted_quotient;
 } options_t;
 
 
@@ -28,6 +29,7 @@ bool parse_options(options_t* options, int argc, char** argv)
     options->dot_original = false;
     options->dot_quotient = false;
     options->dot_colored = false;
+    options->dot_weighted_quotient = false;
 
     int current_arg = 1;
     while (current_arg < argc)
@@ -37,16 +39,25 @@ bool parse_options(options_t* options, int argc, char** argv)
             options->dot_original = true;
             options->dot_quotient = false;
             options->dot_colored = false;
+            options->dot_weighted_quotient = false;
         } else if (strcmp("--dot-colored", argv[current_arg]) == 0)
         {
             options->dot_original = false;
             options->dot_quotient = false;
             options->dot_colored = true;
+            options->dot_weighted_quotient = false;
         } else if (strcmp("--dot-quotient", argv[current_arg]) == 0)
         {
             options->dot_original = false;
             options->dot_quotient = true;
             options->dot_colored = false;
+            options->dot_weighted_quotient = false;
+        } else if (strcmp("--dot-weighted-quotient", argv[current_arg]) == 0)
+        {
+            options->dot_original = false;
+            options->dot_quotient = false;
+            options->dot_colored = false;
+            options->dot_weighted_quotient = true;
         } else
         {
             break;
@@ -158,6 +169,39 @@ igraph_integer_t compute_communities_leiden(igraph_t* graph,
     return nb_clusters;
 }
 
+void weight_quotient_graph(igraph_t* quotient, igraph_vector_t* diameters,
+    igraph_t* result_graph, igraph_vector_t* result_weights)
+{
+    igraph_integer_t vcount = igraph_vcount(quotient);
+
+    // Initialize the weights
+    igraph_vector_init(result_weights, 0);
+
+    // Initialize the output graph
+    igraph_empty(result_graph, vcount, true);
+
+    // Initialize the selector
+    igraph_es_t selector;
+    igraph_es_all(&selector, IGRAPH_EDGEORDER_ID);
+
+    // Initialize the iterator
+    igraph_eit_t iterator;
+    igraph_eit_create(quotient, selector, &iterator);
+
+    while (!IGRAPH_EIT_END(iterator))
+    {
+        igraph_integer_t from, to;
+        igraph_edge(quotient, IGRAPH_EIT_GET(iterator), &from, &to);
+
+        igraph_add_edge(result_graph, from, to);
+        igraph_vector_push_back(result_weights, VECTOR(*diameters)[from]);
+
+        igraph_add_edge(result_graph, to, from);
+        igraph_vector_push_back(result_weights, VECTOR(*diameters)[to]);
+
+        IGRAPH_EIT_NEXT(iterator);
+    }
+}
 
 
 int main(int argc, char** argv)
@@ -229,6 +273,22 @@ int main(int argc, char** argv)
     fprintf(stderr, "Quotient longest path: ");
     vector_int_fprint(stderr, &quotient_longest_path);
     fprintf(stderr, "\n");
+
+    igraph_t weighted_quotient;
+    igraph_vector_t weighted_quotient_weights;
+    weight_quotient_graph(&quotient, &diameters,
+        &weighted_quotient, &weighted_quotient_weights);
+
+    if (options.dot_weighted_quotient)
+    {
+        // Write it as dot format on stdout
+        write_graph_dot_node_colored(&weighted_quotient,
+            &weighted_quotient_weights, stdout);
+    }
+
+    // Destroy the weighted quotient graph
+    igraph_vector_destroy(&weighted_quotient_weights);
+    igraph_destroy(&weighted_quotient);
 
     // Destroy the longest path vector
     igraph_vector_destroy(&quotient_longest_path);
