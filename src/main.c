@@ -218,40 +218,14 @@ int main(int argc, char** argv)
     vector_int_fprint(stderr, &quotient_longest_path);
     fprintf(stderr, "\n");
 
-    // Create the weighted quotient graph
-    igraph_t weighted_quotient;
-    igraph_vector_t weighted_quotient_weights;
-    weight_quotient_graph(&quotient, &diameters,
-        &weighted_quotient, &weighted_quotient_weights);
+    // Take a starting community for double-sweep
+    igraph_integer_t starting_community = VECTOR(quotient_longest_path)[0];
 
-    if (options.dot_weighted_quotient)
-    {
-        // Write it as dot format on stdout
-        write_graph_dot_node_colored(&weighted_quotient,
-            &weighted_quotient_weights, stdout);
-    }
-
-    // Compute all the distances
-    igraph_matrix_t distances;
-    graph_distances(&weighted_quotient, &weighted_quotient_weights, &distances);
-
-    if (options.print_distances)
-    {
-        // Display the distances
-        fprintf(stderr, "Distances: \n");
-        matrix_int_fprint(stderr, &distances, 4);
-    }
-
-    // Print the overall diameter
-    igraph_integer_t diameter = matrix_max_real(&distances);
-    fprintf(stderr, "Diameter: %d\n", diameter);
-
-    // destroy the distances
-    igraph_matrix_destroy(&distances);
-
-    // Destroy the weighted quotient graph
-    igraph_vector_destroy(&weighted_quotient_weights);
-    igraph_destroy(&weighted_quotient);
+    // Compute the double sweep starting from the vertices in a community
+    igraph_integer_t diameter = double_sweep_from_community(&graph, &membership,
+        starting_community);
+    fprintf(stderr, "Diameter (double sweep from starting community): "
+                    "%d\n", diameter);
 
     // Destroy the longest path vector
     igraph_vector_destroy(&quotient_longest_path);
