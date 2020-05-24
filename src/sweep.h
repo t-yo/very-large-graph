@@ -24,6 +24,13 @@ void compute_statistics(igraph_t* graph, igraph_integer_t* count,
     igraph_integer_t* diameter);
 
 /**
+ * @brief Compute the double sweep
+ * @param graph The graph
+ * @return An approximation of the diameter of the graph
+ */
+igraph_integer_t double_sweep(igraph_t* graph);
+
+/**
  * @brief Compute the double sweep starting from a community
  * @param graph The graph
  * @param membership The membership of each vertex

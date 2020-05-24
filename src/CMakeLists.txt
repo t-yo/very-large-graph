@@ -13,7 +13,7 @@ set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Werror -O0 -g3 -fsanitize=addre
 
 add_executable(graph main.c)
 add_executable(extract extract.c)
-add_executable(benchmark benchmark.c)
+add_executable(benchmark benchmark.c benchmark.h)
 
 find_package(IGRAPH REQUIRED)
 
