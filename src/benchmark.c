@@ -15,7 +15,7 @@ static igraph_integer_t normal_double_sweep(igraph_t* graph)
     return double_sweep(graph);
 }
 
-igraph_integer_t quotient_starting_double_sweep(igraph_t* graph)
+static igraph_integer_t quotient_starting_double_sweep(igraph_t* graph)
 {
     // Compute the communities using leiden
     igraph_integer_t ecount = igraph_ecount(graph);

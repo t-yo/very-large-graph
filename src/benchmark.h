@@ -14,6 +14,7 @@
                                                                            \
         while ((tries < 5) || (total_elapsed < 60))                        \
         {                                                                  \
+            printf("total_elapsed: %f\n", total_elapsed);                  \
             FILE* file = fopen((path), "r");                               \
             igraph_t graph;                                                \
             igraph_read_graph_edgelist(&graph, file, 0, false);            \
@@ -39,7 +40,7 @@
             tries += 1;                                                    \
         }                                                                  \
                                                                            \
-        printf("Function: %s\n", "quotient_starting_double_sweep");        \
+        printf("Function: %s\n", #function);                               \
         printf("Tries: %d\n", tries);                                      \
         printf("Total elapsed: %f s\n", total_elapsed);                    \
         printf("Average elapsed: %f s\n", total_elapsed / tries);          \
