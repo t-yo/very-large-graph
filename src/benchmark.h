@@ -7,14 +7,19 @@
 
 #define BENCHMARK(path, function)                                          \
     do {                                                                   \
+        double global_elapsed = 0;                                         \
         double total_elapsed = 0;                                          \
         double total_diameter = 0;                                         \
                                                                            \
+        struct timespec global_start;                                      \
+        clock_gettime(CLOCK_REALTIME, &global_start);                      \
+        double global_start_double =                                       \
+            global_start.tv_nsec * 1E-9 + global_start.tv_sec;             \
+                                                                           \
         int tries = 0;                                                     \
                                                                            \
-        while ((tries < 5) || (total_elapsed < 60))                        \
+        while ((tries < 5) || (global_elapsed < 60))                       \
         {                                                                  \
-            printf("total_elapsed: %f\n", total_elapsed);                  \
             FILE* file = fopen((path), "r");                               \
             igraph_t graph;                                                \
             igraph_read_graph_edgelist(&graph, file, 0, false);            \
@@ -36,6 +41,13 @@
             double end_double = end.tv_nsec * 1E-9 + end.tv_sec;           \
                                                                            \
             total_elapsed += end_double - start_double;                    \
+                                                                           \
+            struct timespec current_time;                                  \
+            clock_gettime(CLOCK_REALTIME, &current_time);                  \
+            double current_time_double =                                   \
+                current_time.tv_nsec * 1E-9 + current_time.tv_sec;         \
+                                                                           \
+            global_elapsed = current_time_double - global_start_double;    \
                                                                            \
             tries += 1;                                                    \
         }                                                                  \
