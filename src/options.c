@@ -50,6 +50,14 @@ static int handle_dot_colored(int argc, char** argv, options_t* options)
     return 1;
 }
 
+static int handle_use_louvain(int argc, char** argv, options_t* options)
+{
+    (void) argc;
+    (void) argv;
+    options->use_leiden = true;
+    return 1;
+}
+
 static int handle_print_membership(int argc, char** argv, options_t* options)
 {
     (void) argc;
@@ -80,6 +88,11 @@ static option_t all_options[] = {
         .callback = handle_dot_quotient,
     },
     {
+        .option = "--use-leiden",
+        .help = "use leiden for communities computation",
+        .callback = handle_use_louvain,
+    },
+    {
         .option = "--print-membership",
         .help = "print the membership of each vertex from the original graph",
         .callback = handle_print_membership,
@@ -94,6 +107,7 @@ bool parse_options(int argc, char** argv, options_t* options)
     options->dot_original = false;
     options->dot_quotient = false;
     options->dot_colored = false;
+    options->use_leiden = false;
     options->print_membership = false;
 
     int options_count = sizeof(all_options) / sizeof(option_t);

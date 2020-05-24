@@ -21,7 +21,11 @@ int main(int argc, char** argv)
     // Create a new graph
     igraph_read_graph_edgelist(&graph, options.input, 0, false);
 
+    // General information
+    // ------------------------------
+
     // Display basic graph information
+    fprintf(stderr, "GENERAL INFORMATION: \n");
     graph_information(options.input_name, &graph);
 
     igraph_integer_t count;
@@ -35,28 +39,44 @@ int main(int argc, char** argv)
         igraph_write_graph_dot(&graph, stdout);
     }
 
-    // Compute the communities using louvain
-    // fprintf(stderr, "Running Louvain\n");
-    // igraph_vector_t membership;
-    // igraph_integer_t nb_clusters = compute_communities_louvain(&graph, &membership);
+    // Communities computations
+    // ------------------------------
 
-    // Compute the communities using leiden
-    igraph_integer_t ecount = igraph_ecount(&graph);
-    igraph_real_t resolution = 1.0 / (2.0 * ecount);
-    igraph_real_t beta = 0.01;
-    fprintf(stderr, "Running Leiden (resolution: %f, beta: %f)\n",
-        resolution, beta);
+    fprintf(stderr, "\nCOMMUNITIES: \n");
+
     igraph_vector_t membership;
-    igraph_integer_t nb_clusters = compute_communities_leiden(&graph,
-        &membership, resolution, beta);
+    igraph_integer_t nb_clusters;
+
+    if (options.use_leiden)
+    {
+        // Compute the communities using leiden
+        igraph_integer_t ecount = igraph_ecount(&graph);
+        igraph_real_t resolution = 1.0 / (2.0 * ecount);
+        igraph_real_t beta = 0.01;
+
+        fprintf(stderr, "Running Leiden (resolution: %f, beta: %f)\n",
+                resolution, beta);
+
+        nb_clusters = compute_communities_leiden(
+                &graph,
+                &membership,
+                resolution,
+                beta);
+    }
+    else
+    {
+        // Compute the communities using louvain
+        fprintf(stderr, "Running Louvain\n");
+        nb_clusters = compute_communities_louvain(&graph, &membership);
+    }
 
     // Print the number of clusters
     fprintf(stderr, "Clusters: %d\n", nb_clusters);
 
     // Print the modularity
-    igraph_real_t modularity;
-    igraph_modularity(&graph, &membership, &modularity, NULL);
-    fprintf(stderr, "Modularity: %f\n", modularity);
+    igraph_real_t leiden_modularity;
+    igraph_modularity(&graph, &membership, &leiden_modularity, NULL);
+    fprintf(stderr, "Modularity: %f\n", leiden_modularity);
 
     if (options.print_membership)
     {
@@ -67,7 +87,6 @@ int main(int argc, char** argv)
     }
 
     // Compute the cluster graph
-
     if (options.dot_colored)
     {
         // Write it as dot format on stdout

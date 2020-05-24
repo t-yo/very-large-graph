@@ -14,6 +14,8 @@ typedef struct options
     bool dot_colored;
     bool dot_quotient;
 
+    bool use_leiden;
+
     bool print_membership;
 } options_t;
 
