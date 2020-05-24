@@ -47,7 +47,13 @@ int main(int argc, char** argv)
     igraph_vector_t membership;
     igraph_integer_t nb_clusters;
 
-    if (options.use_leiden)
+    if (options.use_louvain)
+    {
+        // Compute the communities using louvain
+        fprintf(stderr, "Running Louvain\n");
+        nb_clusters = compute_communities_louvain(&graph, &membership);
+    }
+    else
     {
         // Compute the communities using leiden
         igraph_integer_t ecount = igraph_ecount(&graph);
@@ -62,12 +68,6 @@ int main(int argc, char** argv)
                 &membership,
                 resolution,
                 beta);
-    }
-    else
-    {
-        // Compute the communities using louvain
-        fprintf(stderr, "Running Louvain\n");
-        nb_clusters = compute_communities_louvain(&graph, &membership);
     }
 
     // Print the number of clusters

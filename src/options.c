@@ -54,7 +54,7 @@ static int handle_use_louvain(int argc, char** argv, options_t* options)
 {
     (void) argc;
     (void) argv;
-    options->use_leiden = true;
+    options->use_louvain = true;
     return 1;
 }
 
@@ -88,8 +88,8 @@ static option_t all_options[] = {
         .callback = handle_dot_quotient,
     },
     {
-        .option = "--use-leiden",
-        .help = "use leiden for communities computation",
+        .option = "--use-louvain",
+        .help = "use louvain for communities computation",
         .callback = handle_use_louvain,
     },
     {
@@ -107,7 +107,7 @@ bool parse_options(int argc, char** argv, options_t* options)
     options->dot_original = false;
     options->dot_quotient = false;
     options->dot_colored = false;
-    options->use_leiden = false;
+    options->use_louvain = false;
     options->print_membership = false;
 
     int options_count = sizeof(all_options) / sizeof(option_t);
