@@ -93,22 +93,7 @@ void compute_statistics(igraph_t* graph, igraph_integer_t* count,
     igraph_integer_t* diameter)
 {
     *count = igraph_vcount(graph);
-
-    // First sweep
-    sweep_result_t stats;
-    igraph_bfs(graph, 0, NULL, IGRAPH_ALL, false,
-        NULL, NULL, NULL, NULL, NULL, NULL,
-        NULL, sweep_callback, &stats);
-    *diameter = stats.max_distance;
-
-    // Double sweep
-    igraph_bfs(graph, stats.last_vertex, NULL, IGRAPH_ALL, false,
-        NULL, NULL, NULL, NULL, NULL, NULL,
-        NULL, sweep_callback, &stats);
-    if (stats.max_distance > *diameter)
-    {
-        *diameter = stats.max_distance;
-    }
+    *diameter = double_sweep(graph);
 }
 
 igraph_integer_t double_sweep(igraph_t* graph)
