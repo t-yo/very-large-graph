@@ -13,10 +13,8 @@ typedef struct options
     bool dot_original;
     bool dot_colored;
     bool dot_quotient;
-    bool dot_weighted_quotient;
 
     bool print_membership;
-    bool print_distances;
 } options_t;
 
 /**
