@@ -5,7 +5,7 @@ add_library(lib
     sweep.c sweep.h
     vector.c vector.h
     matrix.c matrix.h
-    options.c options.h)
+    options.c options.h communities.c communities.h)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -std=c11")
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Ofast -march=native")
@@ -13,6 +13,7 @@ set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Werror -O0 -g3 -fsanitize=addre
 
 add_executable(graph main.c)
 add_executable(extract extract.c)
+add_executable(benchmark benchmark.c)
 
 find_package(IGRAPH REQUIRED)
 
@@ -24,3 +25,6 @@ target_link_libraries(graph PRIVATE ${IGRAPH_LIBRARIES} lib)
 
 target_include_directories(extract PRIVATE ${IGRAPH_INCLUDES})
 target_link_libraries(extract PRIVATE ${IGRAPH_LIBRARIES} lib)
+
+target_include_directories(benchmark PRIVATE ${IGRAPH_INCLUDES})
+target_link_libraries(benchmark PRIVATE ${IGRAPH_LIBRARIES} lib)

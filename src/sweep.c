@@ -87,13 +87,6 @@ void compute_clusters_statistics(igraph_t* graph, igraph_integer_t nb_clusters,
         VECTOR(*counts)[i] = count;
         VECTOR(*diameters)[i] = diameter;
     }
-
-    // Print the diameters
-    fprintf(stderr, "Counts: ");
-    vector_int_fprint(stderr, counts);
-    fprintf(stderr, "\nDiameters: ");
-    vector_int_fprint(stderr, diameters);
-    fprintf(stderr, "\n");
 }
 
 void compute_statistics(igraph_t* graph, igraph_integer_t* count,

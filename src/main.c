@@ -1,4 +1,3 @@
-#include <errno.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
@@ -9,137 +8,8 @@
 #include "quotient.h"
 #include "sweep.h"
 #include "vector.h"
-#include "matrix.h"
 #include "options.h"
-
-void compute_communities_louvain(igraph_t* graph)
-{
-    fprintf(stderr, "Running Louvain\n");
-
-    igraph_integer_t vcount = igraph_vcount(graph);
-
-    // Initialize communities
-    igraph_vector_t membership;
-    igraph_vector_init(&membership, vcount);
-
-    // Compute the communities
-    igraph_community_multilevel(graph, NULL, &membership,
-        NULL, NULL);
-
-    fprintf(stderr, "Clusters: %d\n",
-        (int) igraph_vector_max(&membership) + 1);
-
-    igraph_real_t modularity;
-    igraph_modularity(graph, &membership, &modularity, NULL);
-    fprintf(stderr, "Modularity: %f\n", modularity);
-
-    // Print the communities
-    fprintf(stderr, "Membership: ");
-    vector_int_fprint(stderr, &membership);
-    fprintf(stderr, "\n");
-
-    // Destroy the communities
-    igraph_vector_destroy(&membership);
-}
-
-igraph_integer_t compute_communities_leiden(igraph_t* graph,
-    igraph_vector_t* membership)
-{
-    fprintf(stderr, "Running Leiden\n");
-
-    igraph_integer_t vcount = igraph_vcount(graph);
-    igraph_integer_t ecount = igraph_ecount(graph);
-
-    igraph_integer_t nb_clusters = vcount;
-    igraph_real_t quality = 0;
-
-    // Initialize communities
-    igraph_vector_init(membership, vcount);
-
-    // Initialize the degrees
-    igraph_vector_t degrees;
-    igraph_vector_init(&degrees, vcount);
-    igraph_degree(graph, &degrees, igraph_vss_all(), IGRAPH_ALL, true);
-
-    // Compute the resolution
-    igraph_real_t resolution = 1.0 / (2.0 * ecount);
-    igraph_real_t beta = 0.01;
-    fprintf(stderr, "Resolution: %f\nBeta: %f\n", resolution, beta);
-
-    // Compute the communities
-    igraph_community_leiden(graph, NULL, &degrees, resolution, beta,
-        false, membership, &nb_clusters, &quality);
-
-    fprintf(stderr, "Clusters: %d\n", nb_clusters);
-    if (isnan(quality))
-        fprintf(stderr, "Quality: nan\n");
-    else
-        fprintf(stderr, "Quality: %f\n", quality);
-
-    igraph_real_t modularity;
-    igraph_modularity(graph, membership, &modularity, NULL);
-    fprintf(stderr, "Modularity: %f\n", modularity);
-
-    // Destroy the degrees
-    igraph_vector_destroy(&degrees);
-
-    return nb_clusters;
-}
-
-void weight_quotient_graph(igraph_t* quotient, igraph_vector_t* diameters,
-    igraph_t* result_graph, igraph_vector_t* result_weights)
-{
-    igraph_integer_t vcount = igraph_vcount(quotient);
-
-    // Initialize the weights
-    igraph_vector_init(result_weights, 0);
-
-    // Initialize the output graph
-    igraph_empty(result_graph, vcount, true);
-
-    // Initialize the selector
-    igraph_es_t selector;
-    igraph_es_all(&selector, IGRAPH_EDGEORDER_ID);
-
-    // Initialize the iterator
-    igraph_eit_t iterator;
-    igraph_eit_create(quotient, selector, &iterator);
-
-    while (!IGRAPH_EIT_END(iterator))
-    {
-        igraph_integer_t from, to;
-        igraph_edge(quotient, IGRAPH_EIT_GET(iterator), &from, &to);
-
-        igraph_add_edge(result_graph, from, to);
-        igraph_vector_push_back(result_weights, VECTOR(*diameters)[from]);
-
-        igraph_add_edge(result_graph, to, from);
-        igraph_vector_push_back(result_weights, VECTOR(*diameters)[to]);
-
-        IGRAPH_EIT_NEXT(iterator);
-    }
-}
-
-void graph_distances(igraph_t* graph, igraph_vector_t* weights,
-    igraph_matrix_t* results)
-{
-    igraph_integer_t vcount = igraph_vcount(graph);
-
-    // Initialize the matrix
-    igraph_matrix_init(results, vcount, vcount);
-
-    // Initialize the from selector
-    igraph_vs_t from_selector;
-    igraph_vs_all(&from_selector);
-
-    // Initialize the to selector
-    igraph_vs_t to_selector;
-    igraph_vs_all(&to_selector);
-
-    // Compute the paths
-    igraph_shortest_paths_dijkstra(graph, results, from_selector, to_selector,
-        weights, IGRAPH_OUT);
-}
+#include "communities.h"
 
 int main(int argc, char** argv)
 {
@@ -166,11 +36,27 @@ int main(int argc, char** argv)
     }
 
     // Compute the communities using louvain
-    // compute_communities_louvain(&graph);
+    // fprintf(stderr, "Running Louvain\n");
+    // igraph_vector_t membership;
+    // igraph_integer_t nb_clusters = compute_communities_louvain(&graph, &membership);
 
     // Compute the communities using leiden
+    igraph_integer_t ecount = igraph_ecount(&graph);
+    igraph_real_t resolution = 1.0 / (2.0 * ecount);
+    igraph_real_t beta = 0.01;
+    fprintf(stderr, "Running Leiden (resolution: %f, beta: %f)\n",
+        resolution, beta);
     igraph_vector_t membership;
-    igraph_integer_t nb_clusters = compute_communities_leiden(&graph, &membership);
+    igraph_integer_t nb_clusters = compute_communities_leiden(&graph,
+        &membership, resolution, beta);
+
+    // Print the number of clusters
+    fprintf(stderr, "Clusters: %d\n", nb_clusters);
+
+    // Print the modularity
+    igraph_real_t modularity;
+    igraph_modularity(&graph, &membership, &modularity, NULL);
+    fprintf(stderr, "Modularity: %f\n", modularity);
 
     if (options.print_membership)
     {
@@ -197,6 +83,13 @@ int main(int argc, char** argv)
     igraph_vector_t diameters;
     compute_clusters_statistics(&graph, nb_clusters, &membership, &counts,
         &diameters);
+
+    // Print the counts and diameters
+    fprintf(stderr, "Counts: ");
+    vector_int_fprint(stderr, &counts);
+    fprintf(stderr, "\nDiameters: ");
+    vector_int_fprint(stderr, &diameters);
+    fprintf(stderr, "\n");
 
     // Display basic graph information
     graph_information("quotient", &quotient);
