@@ -6,8 +6,10 @@
 
 void graph_information(char* name, igraph_t* graph)
 {
-    fprintf(stderr, "Name: %s\nVertices: %d\nEdges: %d\n", name,
-        igraph_vcount(graph), igraph_ecount(graph));
+    fprintf(stderr, "Name: %s\n", name);
+    fprintf(stderr, "Vertices: %d\n", igraph_vcount(graph));
+    fprintf(stderr, "Edges: %d\n", igraph_ecount(graph));
+    fprintf(stderr, "Directed: %d\n", igraph_is_directed(graph));
 }
 
 static void write_graph_clustered_vertices(igraph_t* graph, FILE* output,
