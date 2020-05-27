@@ -17,14 +17,13 @@
             global_start.tv_nsec * 1E-9 + global_start.tv_sec;             \
                                                                            \
         int tries = 0;                                                     \
+        FILE* file = fopen((path), "r");                                   \
+        igraph_t graph;                                                    \
+        igraph_read_graph_edgelist(&graph, file, 0, false);                \
+        fclose(file);                                                      \
                                                                            \
         while ((tries < 5) || (global_elapsed < 60))                       \
         {                                                                  \
-            FILE* file = fopen((path), "r");                               \
-            igraph_t graph;                                                \
-            igraph_read_graph_edgelist(&graph, file, 0, false);            \
-            fclose(file);                                                  \
-                                                                           \
             struct timespec start;                                         \
             clock_gettime(CLOCK_REALTIME, &start);                         \
                                                                            \
@@ -33,7 +32,6 @@
             struct timespec end;                                           \
             clock_gettime(CLOCK_REALTIME, &end);                           \
                                                                            \
-            igraph_destroy(&graph);                                        \
                                                                            \
             total_diameter += diameter;                                    \
                                                                            \
@@ -51,6 +49,8 @@
                                                                            \
             tries += 1;                                                    \
         }                                                                  \
+                                                                           \
+        igraph_destroy(&graph);                                            \
                                                                            \
         printf("Function: %s\n", #function);                               \
         printf("Tries: %d\n", tries);                                      \
