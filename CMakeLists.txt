@@ -24,7 +24,9 @@ add_library(lib
         src/options.c
         src/options.h
         src/communities.c
-        src/communities.h)
+        src/communities.h
+        src/stopwatch.c
+        src/stopwatch.h)
 
 set(CMAKE_MODULE_PATH  "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
