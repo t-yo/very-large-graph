@@ -99,9 +99,23 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    BENCHMARK(argv[1], normal_double_sweep);
-    BENCHMARK(argv[1], quotient_starting_double_sweep_louvain);
-    BENCHMARK(argv[1], quotient_starting_double_sweep_leiden);
+    int min_tries = 3;
+    int min_time = 5;
+
+    BENCHMARK(argv[1],
+            normal_double_sweep,
+            min_tries,
+            min_time);
+
+    BENCHMARK(argv[1],
+            quotient_starting_double_sweep_louvain,
+            min_tries,
+            min_time);
+
+    BENCHMARK(argv[1],
+            quotient_starting_double_sweep_leiden,
+            min_tries,
+            min_time);
 
     return 0;
 }
