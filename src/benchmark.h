@@ -22,7 +22,7 @@
         igraph_read_graph_edgelist(&graph, file, 0, false);                \
         fclose(file);                                                      \
                                                                            \
-        while ((tries < 5) || (global_elapsed < 60))                       \
+        while ((tries < 3) || (global_elapsed < 60))                       \
         {                                                                  \
             struct timespec start;                                         \
             clock_gettime(CLOCK_REALTIME, &start);                         \
