@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdbool.h>
+
 #include <igraph_datatype.h>
 
 /**
@@ -47,8 +49,9 @@ igraph_integer_t double_sweep_from_community(igraph_t* graph,
  * @param starting_community The start of the double sweeps will be taken from this community
  * @param tries The number of different starts from the starting community
  *              (if the number of nodes in the community is lower, then tries=the number of nodes in the community)
+ * @param verbose print the diameter for all the tries from 0 to 'tries'
  * @return An approximation of the diameter of the graph
  */
 igraph_integer_t double_sweep_from_community_tries(igraph_t* graph,
     igraph_vector_t* membership, igraph_integer_t starting_community,
-    igraph_integer_t tries);
+    igraph_integer_t tries, bool verbose);

@@ -1,4 +1,3 @@
-#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -10,12 +9,15 @@
 #include "communities.h"
 #include "benchmark.h"
 
-static igraph_integer_t normal_double_sweep(igraph_t* graph)
+static igraph_integer_t normal_double_sweep(igraph_t* graph, bool verbose)
 {
+    (void) verbose;
+
     return double_sweep(graph);
 }
 
-static igraph_integer_t quotient_starting_double_sweep_louvain(igraph_t* graph)
+static igraph_integer_t quotient_starting_double_sweep_louvain(igraph_t* graph,
+        bool verbose)
 {
     // Compute the communities using louvain
     igraph_vector_t membership;
@@ -44,7 +46,7 @@ static igraph_integer_t quotient_starting_double_sweep_louvain(igraph_t* graph)
 
     // Compute the double sweep starting from the vertices in a community
     igraph_integer_t diameter = double_sweep_from_community_tries(graph,
-        &membership, starting_community, 1);
+        &membership, starting_community, 3, verbose);
 
     // Destroy the communities
     igraph_vector_destroy(&membership);
@@ -52,7 +54,8 @@ static igraph_integer_t quotient_starting_double_sweep_louvain(igraph_t* graph)
     return diameter;
 }
 
-static igraph_integer_t quotient_starting_double_sweep_leiden(igraph_t* graph)
+static igraph_integer_t quotient_starting_double_sweep_leiden(igraph_t* graph,
+        bool verbose)
 {
     // Compute the communities using leiden
     igraph_integer_t ecount = igraph_ecount(graph);
@@ -84,7 +87,7 @@ static igraph_integer_t quotient_starting_double_sweep_leiden(igraph_t* graph)
 
     // Compute the double sweep starting from the vertices in a community
     igraph_integer_t diameter = double_sweep_from_community_tries(graph,
-        &membership, starting_community, 1);
+        &membership, starting_community, 3, verbose);
 
     // Destroy the communities
     igraph_vector_destroy(&membership);

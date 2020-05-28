@@ -2,6 +2,7 @@
 
 #include <time.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #include <igraph.h>
 
@@ -42,7 +43,7 @@
             stopwatch_point_t start_point;                                   \
             create_stopwatch_point(&start_point);                            \
                                                                              \
-            igraph_integer_t diameter = function(&graph);                    \
+            igraph_integer_t diameter = function(&graph, tries < min_tries); \
                                                                              \
             stopwatch_point_t end_point;                                     \
             create_stopwatch_point(&end_point);                              \

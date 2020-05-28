@@ -141,7 +141,7 @@ static void quotient_starting_double_sweep(igraph_t* graph, options_t* options)
         {
             // Compute the double sweep starting from the vertices in a community
             igraph_integer_t diameter = double_sweep_from_community_tries(graph,
-                &membership, starting_community, n);
+                &membership, starting_community, n, false);
             fprintf(stderr, "Diameter (double sweep from starting community, "
                             "n: %d): %d\n", n, diameter);
         }

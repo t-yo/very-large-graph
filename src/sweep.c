@@ -157,12 +157,17 @@ igraph_integer_t double_sweep_from_community(igraph_t* graph,
 
 igraph_integer_t double_sweep_from_community_tries(igraph_t* graph,
     igraph_vector_t* membership, igraph_integer_t starting_community,
-    igraph_integer_t tries)
+    igraph_integer_t tries, bool verbose)
 {
     igraph_integer_t vcount = igraph_vcount(graph);
 
     igraph_integer_t diameter = 0;
     igraph_integer_t try = 0;
+
+    if (verbose)
+    {
+        fprintf(stderr, "(");
+    }
 
     for (igraph_integer_t i = 0; i < vcount; ++i)
     {
@@ -194,7 +199,22 @@ igraph_integer_t double_sweep_from_community_tries(igraph_t* graph,
             {
                 break;
             }
+
+            if (verbose)
+            {
+                fprintf(stderr, "try %d: %d", try, diameter);
+
+                if (try != tries - 1)
+                {
+                    fprintf(stderr, " | ");
+                }
+            }
         }
+    }
+
+    if (verbose)
+    {
+        fprintf(stderr, ") ");
     }
 
     return diameter;
