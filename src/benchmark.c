@@ -100,7 +100,7 @@ int main(int argc, char** argv)
     }
 
     int min_tries = 3;
-    int min_time = 5;
+    int min_time = 60;
 
     BENCHMARK(argv[1],
             normal_double_sweep,
@@ -108,12 +108,12 @@ int main(int argc, char** argv)
             min_time);
 
     BENCHMARK(argv[1],
-            quotient_starting_double_sweep_louvain,
-            min_tries,
-            min_time);
+              quotient_starting_double_sweep_leiden,
+              min_tries,
+              min_time);
 
     BENCHMARK(argv[1],
-            quotient_starting_double_sweep_leiden,
+            quotient_starting_double_sweep_louvain,
             min_tries,
             min_time);
 
