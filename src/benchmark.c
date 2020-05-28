@@ -43,8 +43,8 @@ static igraph_integer_t quotient_starting_double_sweep_louvain(igraph_t* graph)
     igraph_vector_destroy(&quotient_longest_path);
 
     // Compute the double sweep starting from the vertices in a community
-    igraph_integer_t diameter =
-            double_sweep_from_community(graph, &membership, starting_community);
+    igraph_integer_t diameter = double_sweep_from_community_tries(graph,
+        &membership, starting_community, 1);
 
     // Destroy the communities
     igraph_vector_destroy(&membership);
@@ -83,8 +83,8 @@ static igraph_integer_t quotient_starting_double_sweep_leiden(igraph_t* graph)
     igraph_vector_destroy(&quotient_longest_path);
 
     // Compute the double sweep starting from the vertices in a community
-    igraph_integer_t diameter =
-        double_sweep_from_community(graph, &membership, starting_community);
+    igraph_integer_t diameter = double_sweep_from_community_tries(graph,
+        &membership, starting_community, 1);
 
     // Destroy the communities
     igraph_vector_destroy(&membership);

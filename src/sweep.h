@@ -39,3 +39,16 @@ igraph_integer_t double_sweep(igraph_t* graph);
  */
 igraph_integer_t double_sweep_from_community(igraph_t* graph,
     igraph_vector_t* membership, igraph_integer_t starting_community);
+
+/**
+ * @brief Compute the double sweep starting from a community with a certain number of tries
+ * @param graph The graph
+ * @param membership The membership of each vertex
+ * @param starting_community The start of the double sweeps will be taken from this community
+ * @param tries The number of different starts from the starting community
+ *              (if the number of nodes in the community is lower, then tries=the number of nodes in the community)
+ * @return An approximation of the diameter of the graph
+ */
+igraph_integer_t double_sweep_from_community_tries(igraph_t* graph,
+    igraph_vector_t* membership, igraph_integer_t starting_community,
+    igraph_integer_t tries);

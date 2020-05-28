@@ -16,6 +16,8 @@ typedef struct options
 
     bool use_louvain;
 
+    bool quotient_try_all;
+
     bool print_membership;
 } options_t;
 

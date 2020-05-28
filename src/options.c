@@ -66,6 +66,14 @@ static int handle_print_membership(int argc, char** argv, options_t* options)
     return 1;
 }
 
+static int handle_quotient_try_all(int argc, char** argv, options_t* options)
+{
+    (void) argc;
+    (void) argv;
+    options->quotient_try_all = true;
+    return 1;
+}
+
 static option_t all_options[] = {
     {
         .option = "--help",
@@ -97,6 +105,11 @@ static option_t all_options[] = {
         .help = "print the membership of each vertex from the original graph",
         .callback = handle_print_membership,
     },
+    {
+        .option = "--quotient-try-all",
+        .help = "try all the start vertices in the selected community",
+        .callback = handle_quotient_try_all,
+    },
 };
 
 bool parse_options(int argc, char** argv, options_t* options)
@@ -109,6 +122,7 @@ bool parse_options(int argc, char** argv, options_t* options)
     options->dot_colored = false;
     options->use_louvain = false;
     options->print_membership = false;
+    options->quotient_try_all = false;
 
     int options_count = sizeof(all_options) / sizeof(option_t);
     int current_arg = 1;

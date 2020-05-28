@@ -126,11 +126,27 @@ static void quotient_starting_double_sweep(igraph_t* graph, options_t* options)
     // Destroy the longest path vector
     igraph_vector_destroy(&quotient_longest_path);
 
-    // Compute the double sweep starting from the vertices in a community
-    igraph_integer_t diameter =
-            double_sweep_from_community(graph, &membership, starting_community);
-    fprintf(stderr, "Diameter (double sweep from starting community): "
-                    "%d\n", diameter);
+    if (options->quotient_try_all)
+    {
+        // Compute the double sweep starting from the vertices in a community
+        igraph_integer_t diameter = double_sweep_from_community(graph,
+            &membership, starting_community);
+        fprintf(stderr, "Diameter (double sweep from starting community, "
+                        "n: all): %d\n", diameter);
+    }
+    else
+    {
+        // Try the double sweep with different number of tries
+        for (igraph_integer_t n = 1; n < 10; ++n)
+        {
+            // Compute the double sweep starting from the vertices in a community
+            igraph_integer_t diameter = double_sweep_from_community_tries(graph,
+                &membership, starting_community, n);
+            fprintf(stderr, "Diameter (double sweep from starting community, "
+                            "n: %d): %d\n", n, diameter);
+        }
+
+    }
 
     // Destroy the communities
     igraph_vector_destroy(&membership);
